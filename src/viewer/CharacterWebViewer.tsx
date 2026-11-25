@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls } from "@react-three/drei";
 import JSZip from "jszip";
 import type { HeadFineTuningParams } from "../anatomy/parametricHead3DMM";
 import { RickTaylorRig, type RickMotion, type RickWeaponId, type RickPoseMode } from "../characters/RickTaylorCharacter3DHD";
+import { useFrame } from "@react-three/fiber";
+import { RickAnimationController } from "../animation/RickAnimationController";
 
 export interface CharacterWebViewerProps {
   height?: string | number;
@@ -86,6 +88,12 @@ export function RickController() {
       <button onClick={() => setStep(s => Math.min(4, s + 1))} disabled={step === 4}>{pt ? "Próximo" : "Next"}</button>
     </div>
   </div>;
+}
+
+
+function AnimationPlaybackDriver({ controller, onMotion }: { controller: RickAnimationController; onMotion: (motion: RickMotion) => void }) {
+  useFrame((_, delta) => { onMotion(controller.update(delta)); });
+  return null;
 }
 
 function ExportPanel() {
@@ -177,11 +185,39 @@ export function CharacterWebViewer({
   const [weapon, setWeapon] = useState<RickWeaponId | null>(initialWeapon);
   const [language, setLanguage] = useState<"en" | "pt">("pt");
   const [tab, setTab] = useState<"preview" | "guide" | "export">("preview");
-  const motion: RickMotion = useMemo(() => ({
-    moving: pose === "walk", attackTime: pose === "attack" ? 0.4 : 0,
-    attackStyle: pose === "attack" ? "bat" : null, attackProgress: pose === "attack" ? 0.5 : 0,
-    grabTime: pose === "grab" ? 0.4 : 0, jumpHeight: pose === "jump" ? 0.35 : 0, weapon,
-  }), [pose, weapon]);
+  const [duration, setDuration] = useState(1.0);
+  const [speed, setSpeed] = useState(1.0);
+  const [transitionDuration, setTransitionDuration] = useState(0.25);
+  const [interruptible, setInterruptible] = useState(true);
+  const [playing, setPlaying] = useState(true);
+  const [motion, setMotion] = useState<RickMotion>(() => ({
+    moving: initialPose === "walk", attackTime: initialPose === "attack" ? 0.4 : 0,
+    attackStyle: initialPose === "attack" ? "bat" : null, attackProgress: initialPose === "attack" ? 0.5 : 0,
+    grabTime: initialPose === "grab" ? 0.4 : 0, jumpHeight: initialPose === "jump" ? 0.35 : 0, weapon: initialWeapon,
+  }));
+  const controller = useMemo(() => new RickAnimationController(motion), []);
+  const controllerRef = useRef(controller);
+  useEffect(() => {
+    controller.setInterruptible(interruptible);
+    controller.setDuration(duration);
+    controller.setSpeed(speed);
+  }, [controller, duration, speed, interruptible]);
+  const selectPose = (next: RickPoseMode) => {
+    setPose(next);
+    controller.setInterruptible(true);
+    controller.transitionTo(next, { duration, speed, transitionDuration, weapon });
+    controller.setInterruptible(interruptible);
+    setPlaying(true);
+    controller.play();
+  };
+  const selectWeapon = (next: RickWeaponId | null) => {
+    setWeapon(next);
+    controller.transitionTo(pose, { duration, speed, transitionDuration, weapon: next });
+  };
+  const togglePlayback = () => {
+    if (playing) controller.pause(); else controller.play();
+    setPlaying(!playing);
+  };
 
   return <div style={{ width: "100%", color: "#e8eaf2", fontFamily: "system-ui" }}>
     <nav style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
@@ -194,13 +230,19 @@ export function CharacterWebViewer({
         <color attach="background" args={["#18181f"]} /><ambientLight intensity={0.65} />
         <directionalLight position={[-2.5, 4.5, -3.5]} intensity={1.45} castShadow />
         <directionalLight position={[3, 2.5, 3]} intensity={0.75} color="#9bb8ff" />
+        <AnimationPlaybackDriver controller={controllerRef.current} onMotion={setMotion} />
         <RickTaylorRig motion={motion} equippedWeapon={weapon} bloodIntensity={bloodIntensity} headTuning={headTuning} hideMask={false} />
         <ContactShadows position={[0, 0, 0]} opacity={0.55} scale={6} blur={1.8} />
         <Environment preset="studio" /><OrbitControls target={[0, 1.15, 0]} />
       </Canvas>
       {showControls && <div style={{ position: "absolute", left: 12, top: 12, display: "flex", flexWrap: "wrap", gap: 8, padding: 10, borderRadius: 8, background: "rgba(12,12,18,.88)", color: "white", font: "12px system-ui" }}>
-        <label>Pose <select value={pose} onChange={e => setPose(e.target.value as RickPoseMode)}><option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option><option value="grab">Grab</option><option value="jump">Jump</option></select></label>
-        <label>Weapon <select value={weapon ?? ""} onChange={e => setWeapon((e.target.value || null) as RickWeaponId | null)}><option value="">None</option><option value="pipe">Pipe</option><option value="machete">Machete</option><option value="shotgun">Shotgun</option><option value="sickle">Sickle</option></select></label>
+        <label>Movimento <select value={pose} onChange={e => selectPose(e.target.value as RickPoseMode)}><option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option><option value="grab">Grab</option><option value="jump">Jump</option></select></label>
+        <label>Arma <select value={weapon ?? ""} onChange={e => selectWeapon((e.target.value || null) as RickWeaponId | null)}><option value="">Nenhuma</option><option value="pipe">Cano</option><option value="machete">Facão</option><option value="shotgun">Escopeta</option><option value="sickle">Foice</option></select></label>
+        <label>Duração <input aria-label="Duração da animação" type="range" min="0.2" max="4" step="0.1" value={duration} onChange={e => setDuration(Number(e.target.value))} /> {duration.toFixed(1)}s</label>
+        <label>Velocidade <input aria-label="Velocidade da animação" type="range" min="0.25" max="2.5" step="0.05" value={speed} onChange={e => setSpeed(Number(e.target.value))} /> {speed.toFixed(2)}x</label>
+        <label>Transição <input aria-label="Duração da transição" type="range" min="0" max="1.2" step="0.05" value={transitionDuration} onChange={e => setTransitionDuration(Number(e.target.value))} /> {transitionDuration.toFixed(2)}s</label>
+        <label><input type="checkbox" checked={interruptible} onChange={e => { setInterruptible(e.target.checked); controller.setInterruptible(e.target.checked); }} /> Interrompível</label>
+        <button onClick={togglePlayback}>{playing ? "Pausar" : "Reproduzir"}</button>
       </div>}
       <div style={{ position: "absolute", right: 12, bottom: 10, color: "#ddd", font: "11px system-ui", background: "rgba(12,12,18,.65)", padding: "5px 8px", borderRadius: 6 }}>Rick Taylor · Procedural 3D HD · drag to orbit</div>
     </section>}
