@@ -1,6 +1,6 @@
 {
   "name": "@elilopes/procedural-character-3dhd",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Procedural HD character library for React, Three.js and React Three Fiber",
   "license": "MIT",
   "type": "module",
@@ -24,5 +24,8 @@
     "@react-three/drei": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
   }
 }
