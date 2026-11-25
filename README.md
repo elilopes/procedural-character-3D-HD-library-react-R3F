@@ -264,3 +264,28 @@ const motion = controller.update(deltaSeconds);
 ## Animation editor in the web viewer
 
 The 3D Preview tab now exposes pose selection, weapon selection, animation duration, playback speed, transition duration, interruptibility, and play/pause. Changes are applied through the animation controller and previewed in the live R3F scene.
+
+
+## Controlador avançado de animação
+
+A biblioteca exporta agora `RickAnimationController`, em `src/animation/RickAnimationController.ts`. Ele oferece transições entre poses com duração de crossfade configurável, duração da animação, velocidade de reprodução, possibilidade de interrupção, play/pause/stop e combinação aditiva de canais por `combine()`. O jogo consumidor deve chamar `controller.update(deltaSeconds)` no loop de atualização e entregar o `RickMotion` retornado ao `RickTaylorRig`. O controlador coordena o estado procedural; não substitui a avaliação de pose do rig nem a física, detecção de impacto, dano ou IA do jogo.
+
+```ts
+const controller = new RickAnimationController(createRickIdleMotion("pipe"));
+controller.transitionTo("attack", {
+  duration: 0.65,
+  speed: 1.15,
+  transitionDuration: 0.18,
+  weapon: "pipe",
+  preset: { attackStyle: "bat", attackProgress: 0.5 },
+});
+const motion = controller.update(deltaSeconds);
+```
+
+## Pontos padronizados de fixação de armas
+
+`RICK_WEAPON_MOUNTS` e `RICK_WEAPON_IDS` são exportados de `src/weapons/rickWeaponMounts.ts`. Cada arma possui um pivô de empunhadura na mão direita, posição/rotação/escala locais e uma classificação de empunhadura (`right-hand` ou `two-hand`). O rig utiliza essas transformações ao montar a arma equipada. A geometria e os ramos de ataque específicos de cada arma continuam no rig do personagem.
+
+## Editor de animações no visualizador
+
+A aba 3D Preview agora oferece seleção de pose e arma, duração da animação, velocidade de reprodução, duração da transição, opção de interrupção e play/pause. As alterações são aplicadas pelo controlador de animação e visualizadas na cena R3F.
