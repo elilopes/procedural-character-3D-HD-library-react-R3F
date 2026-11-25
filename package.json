@@ -1,15 +1,13 @@
 {
   "name": "@elilopes/procedural-character-3dhd",
-  "version": "0.1.0",
-  "description": "Customizable procedural HD playable character library for React and Three.js",
+  "version": "0.2.0",
+  "description": "Procedural HD character library for React, Three.js and React Three Fiber",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
-  "peerDependencies": {
-    "react": ">=18",
-    "three": ">=0.160",
-    "@react-three/fiber": ">=8"
-  }
+  "exports": { ".": "./src/index.ts", "./viewer": "./src/viewer/CharacterWebViewer.tsx", "./anatomy": "./src/anatomy/parametricHead3DMM.ts", "./materials": "./src/materials/proceduralSurfaceMaps.ts" },
+  "peerDependencies": { "react": ">=18", "three": ">=0.160", "@react-three/fiber": ">=8", "@react-three/drei": ">=9" },
+  "peerDependenciesMeta": { "@react-three/drei": { "optional": true } }
 }
