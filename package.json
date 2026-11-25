@@ -12,7 +12,9 @@
     "./viewer": "./src/viewer/CharacterWebViewer.tsx",
     "./anatomy": "./src/anatomy/parametricHead3DMM.ts",
     "./materials": "./src/materials/proceduralSurfaceMaps.ts",
-    "./animation": "./src/animation/rickMotionPresets.ts"
+    "./animation": "./src/animation/rickMotionPresets.ts",
+    "./animation-controller": "./src/animation/RickAnimationController.ts",
+    "./weapons": "./src/weapons/rickWeaponMounts.ts"
   },
   "peerDependencies": {
     "react": ">=18",
