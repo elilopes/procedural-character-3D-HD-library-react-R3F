@@ -10,3 +10,8 @@ export type { CharacterWebViewerProps } from "./viewer/CharacterWebViewer";
 
 export { createRickMotionPreset, createRickIdleMotion, createRickWalkMotion, createRickAttackMotion, createRickGrabMotion, createRickJumpMotion } from "./animation/rickMotionPresets";
 export type { RickMotionPresetOptions } from "./animation/rickMotionPresets";
+
+export { RickAnimationController } from "./animation/RickAnimationController";
+export type { RickAnimationOptions, RickAnimationSnapshot } from "./animation/RickAnimationController";
+export { RICK_WEAPON_MOUNTS, RICK_WEAPON_IDS } from "./weapons/rickWeaponMounts";
+export type { RickWeaponMountTransform } from "./weapons/rickWeaponMounts";
