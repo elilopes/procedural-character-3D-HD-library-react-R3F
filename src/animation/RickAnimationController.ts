@@ -44,8 +44,13 @@ export class RickAnimationController {
   setDuration(seconds: number) { this.duration = Math.max(0.05, seconds); this.elapsed = Math.min(this.elapsed, this.duration); }
   setInterruptible(value: boolean) { this.interruptible = value; }
   stop(reset: RickPoseMode = "idle") {
-    this.playing = false; this.transitionTo(reset, { transitionDuration: 0 });
+    this.pose = reset;
+    this.target = createRickMotionPreset(reset, { weapon: this.current.weapon });
+    this.from = this.target;
+    this.current = this.target;
+    this.transitionElapsed = this.transitionDuration;
     this.elapsed = 0;
+    this.playing = false;
   }
   transitionTo(pose: RickPoseMode, options: RickAnimationOptions = {}) {
     if (!this.interruptible && this.playing && this.elapsed < this.duration) return false;
