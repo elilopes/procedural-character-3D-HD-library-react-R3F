@@ -239,3 +239,28 @@ Os módulos do personagem foram extraídos e adaptados de:
 - `apps/web/src/game/characters/proceduralSurfaceMaps.ts`
 
 Projeto original: [elilopes/splatterhouse-clone](https://github.com/elilopes/splatterhouse-clone).
+
+
+## Advanced animation controller
+
+The library now exports `RickAnimationController` from `src/animation/RickAnimationController.ts`. It provides pose transitions with configurable crossfade duration, animation duration, playback speed, interruptibility, pause/play/stop, and additive channel overlays through `combine()`. The host game should call `controller.update(deltaSeconds)` from its render/update loop and pass the returned `RickMotion` to `RickTaylorRig`. The controller orchestrates procedural motion state; it does not replace the rig's procedural pose evaluation or the game's physics, hit detection, damage, or AI.
+
+```ts
+const controller = new RickAnimationController(createRickIdleMotion("pipe"));
+controller.transitionTo("attack", {
+  duration: 0.65,
+  speed: 1.15,
+  transitionDuration: 0.18,
+  weapon: "pipe",
+  preset: { attackStyle: "bat", attackProgress: 0.5 },
+});
+const motion = controller.update(deltaSeconds);
+```
+
+## Standardized weapon mounts
+
+`RICK_WEAPON_MOUNTS` and `RICK_WEAPON_IDS` are exported from `src/weapons/rickWeaponMounts.ts`. Each weapon has a consistent right-hand grip pivot, local position/rotation/scale, and a grip classification (`right-hand` or `two-hand`). The rig now consumes these transforms when mounting the equipped weapon. Existing weapon-specific geometry and attack branches remain in the character rig.
+
+## Animation editor in the web viewer
+
+The 3D Preview tab now exposes pose selection, weapon selection, animation duration, playback speed, transition duration, interruptibility, and play/pause. Changes are applied through the animation controller and previewed in the live R3F scene.
