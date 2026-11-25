@@ -7,3 +7,6 @@ export { createProceduralSurfaceMaps, createWebGPUSurfaceNodeMaterial } from "./
 export type { ProceduralPBRMaps, WebGPUSurfaceMaterialOptions } from "./materials/proceduralSurfaceMaps";
 export { CharacterWebViewer } from "./viewer/CharacterWebViewer";
 export type { CharacterWebViewerProps } from "./viewer/CharacterWebViewer";
+
+export { createRickMotionPreset, createRickIdleMotion, createRickWalkMotion, createRickAttackMotion, createRickGrabMotion, createRickJumpMotion } from "./animation/rickMotionPresets";
+export type { RickMotionPresetOptions } from "./animation/rickMotionPresets";
