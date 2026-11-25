@@ -30,6 +30,16 @@ import { ProceduralCharacter3DHD } from "@elilopes/procedural-character-3dhd";
 ```
 Use `RickTaylorRig` diretamente dentro de um `Canvas` R3F para controle fino.
 
+## Referência de movimentação procedural
+
+O módulo `characters/RickTaylorCharacter3DHD.tsx` preserva o `RickTaylorRig` original e seu loop `useFrame`: ciclo de caminhada, balanço de tronco e membros, poses por arma, arcos de ataque, agarrões, saltos e movimentos especiais (incluindo deslize, varredura e super salto). `animation/rickMotionPresets.ts` fornece funções para gerar estados completos (`createRickIdleMotion`, `createRickWalkMotion`, `createRickAttackMotion`, `createRickGrabMotion` e `createRickJumpMotion`). O jogo consumidor controla o tempo/progresso de ataques e agarrões; o rig interpreta esses valores e anima a pose.
+
+Exemplo:
+```tsx
+import { RickTaylorRig, createRickWalkMotion } from "@elilopes/procedural-character-3dhd";
+<RickTaylorRig motion={createRickWalkMotion("pipe")} equippedWeapon="pipe" />
+```
+
 ## Estrutura
 - `src/characters/RickTaylorCharacter3DHD.tsx`: corpo, rig/skinning, poses e personagem referência.
 - `src/anatomy/parametricHead3DMM.ts`: cabeça, presets, antropometria, landmarks e blendshapes.
