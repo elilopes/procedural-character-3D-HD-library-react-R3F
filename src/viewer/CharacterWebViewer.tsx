@@ -40,8 +40,6 @@ function Guide({ language }: { language: "en" | "pt" }) {
     rickMotionPresets.ts
   game/
     RickInGame.tsx`;
-  const importCode = `import { Canvas } from "@react-three/fiber";
-import { RickTaylorRig, createRickWalkMotion } from "./characters";`;
   const gameCode = `import React from "react";
 import { Canvas } from "@react-three/fiber";
 import { RickTaylorRig, createRickIdleMotion } from "../index";
@@ -95,12 +93,17 @@ function ExportPanel() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [includeMotion, setIncludeMotion] = useState(true);
-  const [includeViewer, setIncludeViewer] = useState(false);
   const files = FILES.filter(f => includeMotion || f.key !== "motion");
+  const safeName = (value: string, fallback: string) => {
+    const cleaned = value.trim().replace(/[\\/:*?"<>|]/g, "-").replace(/\\.\\./g, "-");
+    if (!cleaned) return fallback;
+    const extension = /\\.tsx?$/.test(cleaned) ? "" : (fallback.endsWith(".tsx") ? ".tsx" : ".ts");
+    return cleaned + extension;
+  };
   const loadFiles = async () => Promise.all(files.map(async f => {
     const response = await fetch(RAW + f.folder + "/" + f.original);
     if (!response.ok) throw new Error("Could not download " + f.original + " (" + response.status + ")");
-    return { ...f, source: await response.text(), name: names[f.key].trim() || f.suggestion };
+    return { ...f, source: await response.text(), name: safeName(names[f.key], f.suggestion) };
   }));
   const prepare = async () => {
     const loaded = await loadFiles();
