@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { RICK_WEAPON_MOUNTS } from "../weapons/rickWeaponMounts";
 
 import * as THREE from "three";
 import {
@@ -2320,7 +2321,12 @@ export function RickTaylorRig({
             </group>
           ))}
           {activeWeapon && (
-            <group position={[0.03, -0.47, -0.025]}>
+            <group
+              position={RICK_WEAPON_MOUNTS[activeWeapon].position}
+              rotation={RICK_WEAPON_MOUNTS[activeWeapon].rotation}
+              scale={RICK_WEAPON_MOUNTS[activeWeapon].scale}
+              userData={{ weaponGrip: RICK_WEAPON_MOUNTS[activeWeapon].grip }}
+            >
               <HeldWeaponMesh id={activeWeapon} muzzleRef={muzzleRef} />
             </group>
           )}
